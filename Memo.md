@@ -61,7 +61,7 @@ curl "https://eth-sepolia.g.alchemy.com/v2/{APIKEY}" \
 
 ```
 
-### ② 自分のウォレット残高を見る：eth_getBalance
+### (2) 自分のウォレット残高を見る：eth_getBalance
 
 ```
 curl "https://eth-sepolia.g.alchemy.com/v2/{APIKEY}" \
@@ -69,8 +69,8 @@ curl "https://eth-sepolia.g.alchemy.com/v2/{APIKEY}" \
   -d '{
     "jsonrpc":"2.0",
     "id":1,
-    "method":"eth_chainId",
-    "params":[]
+    "method":"eth_getBalance",
+    "params":["{"0xウォレットアドレス}","latest"]
   }'
 
 ```
