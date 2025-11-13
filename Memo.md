@@ -9,18 +9,11 @@ Eth の testnet
 Cloudflare 
 https://developers.cloudflare.com/web3/ethereum-gateway/
 
-Alchemy
+Alchemy 
 https://www.alchemy.com/rpc/ethereum-sepolia
 
-### Cloud Flare 疎通確認
-
-```
-curl https://api.cloudflare.com/client/v4/zones/{ZONEID}/web3/hostnames \
-    -H "Authorization: Bearer {API TOKEN}"
-
-```
-API
-https://developers.cloudflare.com/web3/how-to/restrict-gateway-access/
+GCP 
+https://docs.cloud.google.com/blockchain-rpc/docs/rpc-api
 
 
 # DOC
