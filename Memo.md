@@ -6,7 +6,9 @@ Eth の testnet
 
 GWはCloudflare 
 
-https://ethereum.github.io/execution-apis/api-documentation/?utm_source=chatgpt.com
+https://developers.cloudflare.com/web3/ethereum-gateway/
 
-https://ethereum.org/ja/developers/docs/apis/json-rpc/?utm_source=chatgpt.com
+https://ethereum.github.io/execution-apis/api-documentation/
+
+https://ethereum.org/ja/developers/docs/apis/json-rpc/
 
