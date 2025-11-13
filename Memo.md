@@ -19,6 +19,9 @@ curl https://api.cloudflare.com/client/v4/zones/{ZONEID}/web3/hostnames \
     -H "Authorization: Bearer {API TOKEN}"
 
 ```
+API
+https://developers.cloudflare.com/web3/how-to/restrict-gateway-access/
+
 
 # DOC
 
@@ -29,7 +32,19 @@ https://ethereum.github.io/execution-apis/api-documentation/
 https://ethereum.org/ja/developers/docs/apis/json-rpc/
 
 
+# CURL
 
+```
+curl "https://eth-sepolia.g.alchemy.com/v2/{APIKEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"eth_blockNumber",
+    "params":[]
+  }'  
+{"jsonrpc":"2.0","id":1,"result":"0x92d414"}%    
+```
 
 
 
