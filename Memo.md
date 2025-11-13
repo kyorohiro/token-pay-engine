@@ -74,3 +74,12 @@ curl "https://eth-sepolia.g.alchemy.com/v2/{APIKEY}" \
   }'
 
 ```
+
+### 送金してもらう
+
+https://cloud.google.com/application/web3/faucet/ethereum/sepolia. 
+--> mainnetにいくらか入ってなくてもOK
+
+https://www.alchemy.com/faucets/ethereum-sepolia. 
+--> mainnetにいくらか入ってないとダメ
+
