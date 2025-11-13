@@ -47,4 +47,30 @@ curl "https://eth-sepolia.g.alchemy.com/v2/{APIKEY}" \
 ```
 
 
+### (1) ネットワーク確認：eth_chainId
 
+```
+curl "https://eth-sepolia.g.alchemy.com/v2/{APIKEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"eth_chainId",
+    "params":[]
+  }'
+
+```
+
+### ② 自分のウォレット残高を見る：eth_getBalance
+
+```
+curl "https://eth-sepolia.g.alchemy.com/v2/{APIKEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"eth_chainId",
+    "params":[]
+  }'
+
+```
