@@ -76,3 +76,15 @@ https://cloud.google.com/application/web3/faucet/ethereum/sepolia.
 https://www.alchemy.com/faucets/ethereum-sepolia. 
 --> mainnetにいくらか入ってないとダメ
 
+
+# Typescript env
+
+
+### How to create TypeScript Project
+
+https://www.digitalocean.com/community/tutorials/typescript-new-project
+
+```
+% npm i -D typescript
+% npx tsc --init
+```
