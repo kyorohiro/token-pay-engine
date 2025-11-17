@@ -15,6 +15,10 @@ https://www.alchemy.com/rpc/ethereum-sepolia
 GCP 
 https://docs.cloud.google.com/blockchain-rpc/docs/rpc-api
 
+Public Node 
+https://eth-mainnet.public.blastapi.io
+
+https://sepolia.blast.io
 
 # DOC
 
