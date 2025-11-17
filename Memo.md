@@ -20,6 +20,12 @@ https://eth-mainnet.public.blastapi.io
 
 https://sepolia.blast.io
 
+Polygon Public Node
+https://polygon-rpc.com/
+https://polygon-bor-rpc.publicnode.com
+https://rpc-amoy.polygon.technology
+
+
 # DOC
 
 https://github.com/ethereum/execution-apis
