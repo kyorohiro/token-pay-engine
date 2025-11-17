@@ -1,3 +1,7 @@
+//
+// Example: Create and restore an Ethereum wallet
+// npx tsx examples/wallet_create.ts
+//
 import {  ethers, randomBytes, keccak256, toUtf8Bytes } from "ethers";
 
 // ランダムなウォレットを作成
