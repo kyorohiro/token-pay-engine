@@ -252,10 +252,4 @@ export function useDialog() {
         showInputPasswordDialog,
         showConfirmDialog,
     };
-
-    return {
-        showDialog,              // ← 汎用 (ReactNode ベース)
-        showInputDialog,         // ← テキスト入力用
-        showInputPasswordDialog, // ← パスワード専用
-    };
 }

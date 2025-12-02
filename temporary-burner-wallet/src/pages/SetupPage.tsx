@@ -3,7 +3,7 @@ import React, { useCallback, useRef, useState } from "react";
 import "../index.css";
 import { Wallet } from "ethers";
 import { useWalletStorage } from "../libs/useWalletStorage";
-import { useDialog } from "../libs/DialogContext";
+import { useDialog } from "../libs/useDialog";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type SetupPageProps = {};
