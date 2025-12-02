@@ -1,5 +1,5 @@
 // src/pages/SetupPage.tsx
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import "../index.css";
 import { Wallet } from "ethers";
 import { useWalletStorage } from "../libs/useWalletStorage";
@@ -10,72 +10,74 @@ type SetupPageProps = {};
 const SetupPage: React.FC<SetupPageProps> = () => {
   const { save } = useWalletStorage();
 
-  const [dialogMode, setDialogMode] = useState<"none" | "create" | "import">(
-    "none"
+  // --- ダイアログ用の state ---
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogPassword, setDialogPassword] = useState("");
+  const [dialogError, setDialogError] = useState<string | null>(null);
+
+  // Promise の resolve を保持する
+  const dialogResolveRef = useRef<((password: string | null) => void) | null>(
+    null
   );
-  const [password, setPassword] = useState("");
-  const [privateKeyInput, setPrivateKeyInput] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isBusy, setIsBusy] = useState(false);
 
-  const openCreateDialog = () => {
-    setDialogMode("create");
-    setPassword("");
-    setPrivateKeyInput("");
-    setError(null);
+  // ここが「命令的 API」相当
+  const showInputPasswordDialog = useCallback((): Promise<string | null> => {
+    return new Promise<string | null>((resolve) => {
+      dialogResolveRef.current = resolve;
+      setDialogPassword("");
+      setDialogError(null);
+      setDialogOpen(true);
+    });
+  }, []);
+
+  const handleDialogOk = () => {
+    if (!dialogPassword.trim()) {
+      setDialogError("パスワードを入力してください");
+      return;
+    }
+    if (dialogResolveRef.current) {
+      dialogResolveRef.current(dialogPassword);
+      dialogResolveRef.current = null;
+    }
+    setDialogOpen(false);
   };
 
-  const openImportDialog = () => {
-    setDialogMode("import");
-    setPassword("");
-    setPrivateKeyInput("");
-    setError(null);
+  const handleDialogCancel = () => {
+    if (dialogResolveRef.current) {
+      // キャンセル時は null を返すようにしておく
+      dialogResolveRef.current(null);
+      dialogResolveRef.current = null;
+    }
+    setDialogOpen(false);
   };
 
-  const closeDialog = () => {
-    if (isBusy) return;
-    setDialogMode("none");
-    setPassword("");
-    setPrivateKeyInput("");
-    setError(null);
-  };
+  // --- ボタンハンドラ ---
 
-  const handleDialogSubmit = async () => {
-    if (!password.trim()) {
-      setError("パスワードを入力してください");
+  const onCreateNew = async () => {
+    console.log("新規ウォレット作成");
+    const password = await showInputPasswordDialog();
+    if (!password) {
+      // キャンセルされた
       return;
     }
 
-    try {
-      setIsBusy(true);
-      setError(null);
+    const wallet = Wallet.createRandom();
+    const privateKey = wallet.privateKey;
 
-      if (dialogMode === "create") {
-        // 2) Wallet を作成
-        const wallet = Wallet.createRandom();
-        const privateKey = wallet.privateKey;
+    await save(privateKey, password, { target: "ethereum" });
+    // save が終わると state が "unlocked" になり、App 側で WalletPage に遷移する想定
+  };
 
-        // 3) 保存
-        await save(privateKey, password, { target: "ethereum" });
-      } else if (dialogMode === "import") {
-        if (!privateKeyInput.trim()) {
-          setError("インポートする秘密鍵を入力してください");
-          setIsBusy(false);
-          return;
-        }
-
-        await save(privateKeyInput.trim(), password, { target: "ethereum" });
-      }
-
-      // save が終わると Context 経由で state が "unlocked" になり、
-      // App 側の切り替えで WalletPage に遷移する想定
-      closeDialog();
-    } catch (e) {
-      console.error(e);
-      setError("ウォレットの保存に失敗しました");
-    } finally {
-      setIsBusy(false);
+  const onImport = async () => {
+    console.log("ウォレットインポート");
+    const password = await showInputPasswordDialog();
+    if (!password) {
+      return;
     }
+
+    // TODO: 実際はここでインポートする秘密鍵を別の手段（テキスト入力 or QR とか）で取得
+    const importedPrivateKey = "importedPrivateKey";
+    await save(importedPrivateKey, password, { target: "ethereum" });
   };
 
   return (
@@ -91,7 +93,7 @@ const SetupPage: React.FC<SetupPageProps> = () => {
         <div className="mt-8 space-y-4">
           <button
             type="button"
-            onClick={openCreateDialog}
+            onClick={onCreateNew}
             className="w-full px-4 py-3 text-sm font-medium rounded-xl
                        bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700
                        transition-colors"
@@ -101,7 +103,7 @@ const SetupPage: React.FC<SetupPageProps> = () => {
 
           <button
             type="button"
-            onClick={openImportDialog}
+            onClick={onImport}
             className="w-full px-4 py-3 text-sm font-medium rounded-xl
                        border border-slate-600 bg-slate-900 hover:bg-slate-800
                        active:bg-slate-950 transition-colors"
@@ -111,33 +113,14 @@ const SetupPage: React.FC<SetupPageProps> = () => {
         </div>
       </div>
 
-      {/* パスワード/秘密鍵入力ダイアログ */}
-      {dialogMode !== "none" && (
+      {/* ここが「ダイアログの見た目」定義 */}
+      {dialogOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
           <div className="w-full max-w-sm mx-4 rounded-2xl bg-slate-900 border border-slate-700 p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold">
-              {dialogMode === "create" ? "新規ウォレット作成" : "ウォレットインポート"}
-            </h2>
+            <h2 className="text-lg font-semibold">パスワード入力</h2>
             <p className="mt-1 text-xs text-slate-400">
-              ローカルにのみ保存される一時的なウォレットです。
+              このウォレットの暗号化に使用するパスワードを入力してください。
             </p>
-
-            {dialogMode === "import" && (
-              <div className="mt-4">
-                <label className="block text-xs text-slate-300 mb-1">
-                  秘密鍵
-                </label>
-                <input
-                  type="text"
-                  className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm
-                             focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="0x から始まる秘密鍵"
-                  value={privateKeyInput}
-                  onChange={(e) => setPrivateKeyInput(e.target.value)}
-                  disabled={isBusy}
-                />
-              </div>
-            )}
 
             <div className="mt-4">
               <label className="block text-xs text-slate-300 mb-1">
@@ -147,37 +130,31 @@ const SetupPage: React.FC<SetupPageProps> = () => {
                 type="password"
                 className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm
                            focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                placeholder="このウォレット用のパスワード"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isBusy}
+                value={dialogPassword}
+                onChange={(e) => setDialogPassword(e.target.value)}
               />
             </div>
 
-            {error && (
-              <p className="mt-3 text-xs text-red-400">
-                {error}
-              </p>
+            {dialogError && (
+              <p className="mt-3 text-xs text-red-400">{dialogError}</p>
             )}
 
             <div className="mt-6 flex gap-2 justify-end">
               <button
                 type="button"
-                onClick={closeDialog}
-                disabled={isBusy}
+                onClick={handleDialogCancel}
                 className="px-3 py-2 text-xs rounded-lg border border-slate-600
-                           bg-slate-900 hover:bg-slate-800 disabled:opacity-60"
+                           bg-slate-900 hover:bg-slate-800"
               >
                 キャンセル
               </button>
               <button
                 type="button"
-                onClick={handleDialogSubmit}
-                disabled={isBusy}
+                onClick={handleDialogOk}
                 className="px-4 py-2 text-xs font-medium rounded-lg
-                           bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60"
+                           bg-emerald-600 hover:bg-emerald-500"
               >
-                {isBusy ? "保存中..." : "OK"}
+                OK
               </button>
             </div>
           </div>
