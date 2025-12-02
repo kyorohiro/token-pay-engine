@@ -1,11 +1,23 @@
 // src/pages/WalletPage.tsx
 import React from "react";
+import { useWalletStorage } from "../libs/useWalletStorage";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type WalletPageProps = {
-    onBurn: () => void;   // Burnされたら Setup に戻す
+    // onBurn: () => void;   // Burnされたら Setup に戻す
 };
 
-const WalletPage: React.FC<WalletPageProps> = ({ onBurn }) => {
+// eslint-disable-next-line no-empty-pattern
+const WalletPage: React.FC<WalletPageProps> = ({ }) => {
+    const {
+        // state, 
+        //wallet, meta, unlock, save, 
+        burn
+    } = useWalletStorage();
+    const onBurn = async () => {
+        console.log("ウォレットをBurnします");
+        burn();
+    }
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
             <div className="w-full max-w-lg px-6 py-8 bg-slate-900/80 border border-slate-700 rounded-2xl shadow-xl space-y-6">

@@ -1,15 +1,34 @@
 // src/pages/SetupPage.tsx
 import React from "react";
 import "../index.css";
+import { useWalletStorage } from "../libs/useWalletStorage";
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type SetupPageProps = {
-  onCreateNew: () => void;
-  onImport: () => void;
+  // onCreateNew: () => void;
+  // onImport: () => void;
 };
 
-const SetupPage: React.FC<SetupPageProps> = ({
-  onCreateNew,
-  onImport,
-}) => {
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const SetupPage: React.FC<SetupPageProps> = () => {
+ const { 
+  save
+  //state, 
+      //wallet, meta, unlock, save, burn 
+    } = useWalletStorage();
+  const onCreateNew = async () => {
+    // 新規ウォレット作成ロジックをここに追加
+    console.log("新規ウォレット作成");
+    // TODO ダイアログを表示してパスワードを取得し、ウォレットを作成
+    //
+    // TODO ここで、実際に保存 
+    save("newlyGeneratedPrivateKey", "userPassword", { target: "ethereum"})
+  }
+
+  const onImport = async () => {
+    // インポートロジックをここに追加
+    console.log("ウォレットインポート");
+    save("importedPrivateKey", "userPassword", { target: "ethereum"})
+  }
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
       <div className="w-full max-w-md px-6 py-8 bg-slate-900/80 border border-slate-700 rounded-2xl shadow-xl">
