@@ -1,6 +1,6 @@
 // src/pages/SetupPage.tsx
 import React from "react";
-
+import "../index.css";
 type SetupPageProps = {
   onCreateNew: () => void;
   onImport: () => void;
