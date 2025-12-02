@@ -3,12 +3,14 @@ import React, { useCallback, useRef, useState } from "react";
 import "../index.css";
 import { Wallet } from "ethers";
 import { useWalletStorage } from "../libs/useWalletStorage";
+import { useDialog } from "../libs/DialogContext";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type SetupPageProps = {};
 
 const SetupPage: React.FC<SetupPageProps> = () => {
   const { save } = useWalletStorage();
+  const { showDialog } = useDialog();
 
   // --- ダイアログ用の state ---
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -55,6 +57,23 @@ const SetupPage: React.FC<SetupPageProps> = () => {
 
   const onCreateNew = async () => {
     console.log("新規ウォレット作成");
+        // 確認だけ出してみる例
+    const confirm = await showDialog({
+      title: "新規ウォレットを作成",
+      body: (
+        <>
+          <p className="text-xs text-slate-300">
+            新しい一時ウォレットを作成します。既存のウォレットとは別物として扱われます。
+          </p>
+        </>
+      ),
+      okText: "作成する",
+      cancelText: "やめる",
+    });
+
+    if (confirm !== "ok") {
+      return;
+    }
     const password = await showInputPasswordDialog();
     if (!password) {
       // キャンセルされた
