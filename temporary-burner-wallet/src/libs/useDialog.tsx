@@ -132,6 +132,52 @@ const TextInputDialog: React.FC<{
     );
 };
 
+
+// useDialog.tsx の下の方に追加
+
+type ProgressDialogOptions = {
+    title?: string;
+    message?: string;
+    cancellable?: boolean;
+    cancelText?: string;
+    onCancel?: () => void;
+};
+
+const ProgressDialog: React.FC<{
+    options: ProgressDialogOptions;
+    onCancel?: () => void;
+}> = ({ options, onCancel }) => {
+    const { title, message, cancellable, cancelText } = options;
+
+    return (
+        <div className="w-full max-w-sm rounded-2xl bg-slate-900 p-6 shadow-xl border border-slate-700 text-slate-100">
+            <h2 className="text-lg font-semibold mb-3">
+                {title ?? "処理中…"}
+            </h2>
+            <div className="flex items-center gap-3">
+                {/* 簡易スピナー */}
+                <div className="w-5 h-5 border-2 border-slate-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs text-slate-300">
+                    {message ?? "しばらくお待ちください。"}
+                </p>
+            </div>
+
+            {cancellable && (
+                <div className="mt-4 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="px-3 py-1.5 rounded-lg border border-slate-600 hover:bg-slate-800 text-xs"
+                    >
+                        {cancelText ?? "キャンセル"}
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+
+
 // ----------------------
 // 公開フック
 // ----------------------
@@ -140,6 +186,7 @@ type ShowDialogHelpers<T> = {
     resolve: (value: T | null) => void;
     close: () => void; // resolve(null) のショートカット
 };
+
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useDialog() {
@@ -245,11 +292,41 @@ export function useDialog() {
         [showDialog]
     );
 
+    const showProgressDialog = React.useCallback(
+        (options: ProgressDialogOptions): { close: () => void } => {
+            const id = crypto.randomUUID();
+
+            const handleCancel = () => {
+                if (options.onCancel) {
+                    options.onCancel();
+                }
+                pop(id);
+            };
+
+            const node = (
+                <ProgressDialog
+                    options={options}
+                    onCancel={options.cancellable ? handleCancel : undefined}
+                />
+            );
+
+            push({ id, node });
+
+            return {
+                close: () => {
+                    pop(id);
+                },
+            };
+        },
+        [push, pop]
+    );
+
     // return に追加
     return {
         showDialog,
         showInputDialog,
         showInputPasswordDialog,
         showConfirmDialog,
+        showProgressDialog,
     };
 }
