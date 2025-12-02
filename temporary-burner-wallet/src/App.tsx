@@ -1,35 +1,41 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.tsx
+import React, { useState } from "react";
+import { SetupPage } from "./pages/SetupPage";
+import { WalletPage } from "./pages/WalletPage";
 
-function App() {
-  const [count, setCount] = useState(0)
+type View = "setup" | "wallet";
+
+const STORAGE_KEY = "burner_wallet_registered";
+
+const App: React.FC = () => {
+  const [view, setView] = useState<View>(() => {
+    // 初回レンダー時だけ呼ばれる lazy initializer
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored === "1" ? "wallet" : "setup";
+  });
+
+  const registerWallet = () => {
+    // TODO: ここで実際のウォレット生成 or インポート処理
+    localStorage.setItem(STORAGE_KEY, "1");
+    setView("wallet");
+  };
+
+  const burnWallet = () => {
+    // TODO: ここで実際のウォレット情報削除
+    localStorage.removeItem(STORAGE_KEY);
+    setView("setup");
+  };
+
+  if (view === "wallet") {
+    return <WalletPage onBurn={burnWallet} />;
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <SetupPage
+      onCreateNew={registerWallet}
+      onImport={registerWallet}
+    />
+  );
+};
 
-export default App
+export default App;
