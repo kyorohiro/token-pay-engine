@@ -52,8 +52,19 @@ const WalletPage: React.FC<WalletPageProps> = ({ }) => {
     }, [state]);
     const onBurn = async () => {
         console.log("ウォレットをBurnします");
+        const secret = getSecretPhraseFromWallet(wallet!);
+        if (!secret) {
+            await showConfirmDialog({
+                title: "バックアップエラー",
+                body: "バックアップ用の秘密情報を取得できませんでした。\nこの状態ではウォレットを削除しないでください。",
+                okText: "OK",
+                // cancelText は省略可（シンプルな OK ダイアログにする）
+            });
+            return;
+        }
+
+        await downloadTextFile("wallet_backup.txt", secret);
         //
-        await downloadTextFile("wallet_backup.txt", getSecretPhraseFromWallet(wallet!) ?? "");
         const resut = await showConfirmDialog({
             title: "ウォレットのBurn",
             body:
