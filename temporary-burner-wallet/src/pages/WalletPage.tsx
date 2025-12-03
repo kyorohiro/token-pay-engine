@@ -1,6 +1,8 @@
 // src/pages/WalletPage.tsx
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useWalletStorage } from "../libs/useWalletStorage";
+import { useDialog } from "../libs/useDialog";
+import { downloadTextFile, getSecretPhraseFromWallet } from "../libs/walletBackup";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 type WalletPageProps = {
@@ -10,13 +12,58 @@ type WalletPageProps = {
 // eslint-disable-next-line no-empty-pattern
 const WalletPage: React.FC<WalletPageProps> = ({ }) => {
     const {
-        // state, 
-        //wallet, meta, unlock, save, 
+        state,
+        wallet,
+        // meta,
+        unlock,
+        //  save, 
         burn
     } = useWalletStorage();
+    const {
+        showInputPasswordDialog, showConfirmDialog,
+    } = useDialog();
+    const address = wallet?.address ?? "";
+    const promptedRef = useRef(false);
+    useEffect(() => {
+        // setAddress(wallet ? wallet.address : "");
+        // すでにこの locked フェーズでダイアログ出してたら何もしない
+        if (state != "locked") {
+            promptedRef.current = false;
+            return;
+        }
+        if (promptedRef.current) return;
+        promptedRef.current = true;
+        const run = async () => {
+            console.log("> WalletPage: state=", state);
+            if (state == "locked") {
+                const password = await showInputPasswordDialog();
+                try {
+                    const result = await unlock(password ?? "");
+                    if (!result) {
+                        run(); // 再度パスワード入力を促す
+                    }
+                } catch (error) {
+                    console.error("Failed to unlock wallet:", error);
+                    run(); // 再度パスワード入力を促す
+                }
+            }
+        };
+        run();
+    }, [state]);
     const onBurn = async () => {
         console.log("ウォレットをBurnします");
-        burn();
+        //
+        await downloadTextFile("wallet_backup.txt", getSecretPhraseFromWallet(wallet!) ?? "");
+        const resut = await showConfirmDialog({
+            title: "ウォレットのBurn",
+            body:
+                "ウォレットのバックアップを保存しましたか？\n本当にウォレットを削除してSetup画面に戻りますか？",
+            okText: "はい、Burnします",
+            cancelText: "キャンセル",
+        });
+        if (resut) {
+            burn();
+        }
     }
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
@@ -36,7 +83,7 @@ const WalletPage: React.FC<WalletPageProps> = ({ }) => {
                     </p>
                     <ul className="list-disc list-inside text-xs text-slate-400 space-y-1">
                         <li>ネットワーク名</li>
-                        <li>ウォレットアドレス</li>
+                        <li>ウォレットアドレス : {address}</li>
                         <li>残高</li>
                         <li>Backup / Burn ボタン</li>
                     </ul>
