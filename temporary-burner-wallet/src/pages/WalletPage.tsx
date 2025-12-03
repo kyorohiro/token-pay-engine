@@ -49,7 +49,7 @@ const WalletPage: React.FC<WalletPageProps> = ({ }) => {
             }
         };
         run();
-    }, [state]);
+    }, [state, showInputPasswordDialog, unlock]);
     const onBurn = async () => {
         console.log("ウォレットをBurnします");
         const secret = getSecretPhraseFromWallet(wallet!);
