@@ -179,6 +179,82 @@ const ProgressDialog: React.FC<{
 
 
 // ----------------------
+// 選択肢ダイアログ
+// ----------------------
+
+type SelectOption = {
+    value: string;
+    label: string;
+    description?: React.ReactNode;
+    disabled?: boolean;
+};
+
+type SelectDialogOptions = {
+    title?: string;
+    message?: React.ReactNode;
+    options: SelectOption[];
+    cancelText?: string;
+};
+
+const SelectDialog: React.FC<{
+    options: SelectDialogOptions;
+    onSelect: (value: string) => void;
+    onCancel: () => void;
+}> = ({ options, onSelect, onCancel }) => {
+    return (
+        <div className="w-full max-w-sm rounded-2xl bg-slate-900 p-6 shadow-xl border border-slate-700 text-slate-100">
+            <h2 className="text-lg font-semibold mb-3">
+                {options.title ?? "選択してください"}
+            </h2>
+
+            {options.message && (
+                <div className="mb-3 text-xs text-slate-300">
+                    {options.message}
+                </div>
+            )}
+
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+                {options.options.map((opt) => (
+                    <button
+                        key={opt.value}
+                        type="button"
+                        disabled={opt.disabled}
+                        onClick={() => !opt.disabled && onSelect(opt.value)}
+                        className={`
+                            w-full text-left px-3 py-2 rounded-xl border text-xs
+                            ${
+                                opt.disabled
+                                    ? "border-slate-700 text-slate-500 cursor-not-allowed"
+                                    : "border-slate-600 hover:bg-slate-800 cursor-pointer"
+                            }
+                        `}
+                    >
+                        <div className="font-medium text-slate-100">
+                            {opt.label}
+                        </div>
+                        {opt.description && (
+                            <div className="text-[11px] text-slate-400 mt-0.5">
+                                {opt.description}
+                            </div>
+                        )}
+                    </button>
+                ))}
+            </div>
+
+            <div className="mt-4 flex justify-end">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-3 py-1.5 rounded-lg border border-slate-600 hover:bg-slate-800 text-xs text-slate-300"
+                >
+                    {options.cancelText ?? "キャンセル"}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+// ----------------------
 // 公開フック
 // ----------------------
 
@@ -267,21 +343,21 @@ export function useDialog() {
         (opts: SimpleDialogOptions): Promise<boolean | null> => {
             return showDialog<boolean>(({ resolve, close }) => (
                 <div className="w-full max-w-sm rounded-2xl bg-slate-900 p-6 shadow-xl border border-slate-700">
-                    <h2 className="text-lg font-semibold mb-3">{opts.title}</h2>
+                    <h2 className="text-lg font-semibold mb-3 text-slate-300">{opts.title}</h2>
                     <div className="text-xs text-slate-300">{opts.body}</div>
 
                     <div className="mt-4 flex justify-end gap-2 text-sm">
                         <button
                             type="button"
                             onClick={close}
-                            className="px-3 py-1.5 rounded-lg border border-slate-600 hover:bg-slate-800"
+                            className="px-3 py-1.5 rounded-lg border border-slate-600 hover:bg-slate-800  text-slate-300"
                         >
                             {opts.cancelText ?? "キャンセル"}
                         </button>
                         <button
                             type="button"
                             onClick={() => resolve(true)}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500"
+                            className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500  text-slate-300"
                         >
                             {opts.okText ?? "OK"}
                         </button>
@@ -321,6 +397,18 @@ export function useDialog() {
         [push, pop]
     );
 
+    const showSelectDialog = useCallback(
+        (opts: SelectDialogOptions): Promise<string | null> => {
+            return showDialog<string>(({ resolve, close }) => (
+                <SelectDialog
+                    options={opts}
+                    onSelect={(value) => resolve(value)}
+                    onCancel={close}
+                />
+            ));
+        },
+        [showDialog]
+    );
     // return に追加
     return {
         showDialog,
@@ -328,5 +416,6 @@ export function useDialog() {
         showInputPasswordDialog,
         showConfirmDialog,
         showProgressDialog,
+        showSelectDialog,
     };
 }

@@ -10,7 +10,7 @@ type SetupPageProps = {};
 
 const SetupPage: React.FC<SetupPageProps> = () => {
   const { save } = useWalletStorage();
-  const { showConfirmDialog } = useDialog();
+  const { showConfirmDialog, showSelectDialog } = useDialog();
 
   // --- ダイアログ用の state ---
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -72,6 +72,20 @@ const SetupPage: React.FC<SetupPageProps> = () => {
     if (!confirm) {
       return;
     }
+    // 
+    const selectedWalletType = await showSelectDialog({
+      title: "ウォレットタイプの選択",
+      message:"作成するウォレットのタイプを選択してください。",
+      options: [
+        { label: "Ethereum", value: "ethereum" },
+        { label: "Sepolia(Testnet)", value: "sepolia", disabled: false },
+      ],
+    })
+    if(! selectedWalletType) {
+      // キャンセルされた
+      return;
+    }
+    // パスワード入力ダイアログを表示
     const password = await showInputPasswordDialog();
     if (!password) {
       // キャンセルされた
@@ -81,7 +95,7 @@ const SetupPage: React.FC<SetupPageProps> = () => {
     const wallet = Wallet.createRandom();
     const privateKey = wallet.privateKey;
 
-    await save(privateKey, password, { target: "ethereum" });
+    await save(privateKey, password, { target: selectedWalletType! });
     // save が終わると state が "unlocked" になり、App 側で WalletPage に遷移する想定
   };
 
